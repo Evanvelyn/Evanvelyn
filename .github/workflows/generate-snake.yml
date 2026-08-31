@@ -4,6 +4,7 @@ on:
   schedule:
     # 02:17 China Standard Time; a daily refresh is enough for contribution data.
     - cron: "17 18 * * *"
+  # Keep a manual refresh available after profile updates.
   workflow_dispatch:
   push:
     branches:
