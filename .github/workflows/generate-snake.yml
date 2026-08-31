@@ -1,0 +1,46 @@
+name: Generate contribution snake
+
+on:
+  schedule:
+    # 02:17 China Standard Time; a daily refresh is enough for contribution data.
+    - cron: "17 18 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/generate-snake.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: contribution-snake
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+
+    steps:
+      - name: Generate light and dark snake animations
+        # Platane/snk v3.5.0, pinned to an immutable commit.
+        uses: Platane/snk/svg-only@d8f6715049803e982ee5ff501b6b9b7d5deeb09b
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg?color_snake=#0B4F3A&color_dots=#EBEDF0,#C7F9E9,#70E0BA,#2AA876,#116B4F
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark&color_snake=#D8FFF0&color_dots=#161B22,#0D3B2E,#146B4F,#22A874,#7BE0B0
+
+      - name: Publish animations to the output branch
+        # crazy-max/ghaction-github-pages v4.2.0, pinned to an immutable commit.
+        uses: crazy-max/ghaction-github-pages@df5cc2bfa78282ded844b354faee141f06b41865
+        with:
+          target_branch: output
+          build_dir: dist
+          jekyll: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
